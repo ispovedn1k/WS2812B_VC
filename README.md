@@ -1,2 +1,7 @@
 # WS2812B_VC
-WS2812B HSL Driver and Animations on STM32F103C8T6 with Circular DMA buffer
+WS2812B HSV Driver and Animations on STM32F103C8T6 with Circular DMA buffer
+
+[RU]
+Предназначено для работы с лентами с большим количеством светодиодов (от 150 до 1000+ штук).
+Круговой режим DMA обеспечивает непрерывную подачу сигналов в ленту.
+Расчёт анимации выполняется в режиме HSV с промежуточной конвертацией в RGB.
