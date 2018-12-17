@@ -52,7 +52,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "ws2812b.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -81,6 +81,7 @@ void Error_Handler(void);
 #define T_PERIOD 90
 #define T0H 26
 #define T1H 65
+#define T_RESET 0
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

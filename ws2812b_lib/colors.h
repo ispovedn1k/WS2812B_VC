@@ -3,6 +3,7 @@
 
 #define LED_OFF	0x00000000
 
+//						  A G R B
 #define RGBA_GREEN		0x10FF0000
 #define RGBA_RED		0x1000FF00
 #define RGBA_BLUE		0x100000FF

@@ -1,4 +1,6 @@
 #include "ws2812b.h"
+#include "animations.h"
+
 
 #define WS2812B_FREQ			800000L		// 800 kHz
 #define MAXRESET_HOLD_100FPS	1			// 1  страница

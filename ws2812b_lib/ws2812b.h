@@ -3,7 +3,6 @@
 
 #include "main.h"
 #include "color_schemes.h"
-#include "animations.h"
 
 
 #define STRIP_LEDS_NUM				300					// сколько светодиодов ленты используем
@@ -18,9 +17,8 @@
  extern "C" {
 #endif
 
-typedef uint16_t bit_unit_t, *bit_unit_p;
+typedef uint8_t bit_unit_t, *bit_unit_p;
 typedef HSV_t	 led_unit_t, *led_unit_p;
-
 
 extern led_unit_t			g_leds[LEDS_BUFFER_LENGTH];
 extern bit_unit_t			g_dma_double_buffer[DMA_BUFF_LENGTH];

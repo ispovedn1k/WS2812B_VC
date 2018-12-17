@@ -41,7 +41,7 @@
 #include "tim.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "dma.h"
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim3;
@@ -95,7 +95,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* tim_pwmHandle)
     /* TIM3 DMA Init */
     /* TIM3_CH3 Init */
     hdma_tim3_ch3.Instance = DMA1_Channel2;
-    hdma_tim3_ch3.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_tim3_ch3.Init.Direction = DMA_MEMORY_TO_PERIPH;
     hdma_tim3_ch3.Init.PeriphInc = DMA_PINC_DISABLE;
     hdma_tim3_ch3.Init.MemInc = DMA_MINC_ENABLE;
     hdma_tim3_ch3.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
@@ -110,7 +110,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* tim_pwmHandle)
     __HAL_LINKDMA(tim_pwmHandle,hdma[TIM_DMA_ID_CC3],hdma_tim3_ch3);
 
   /* USER CODE BEGIN TIM3_MspInit 1 */
-
+    hdma_tim3_ch3.XferHalfCpltCallback = DMA_HalfTransfer_Callback;
   /* USER CODE END TIM3_MspInit 1 */
   }
 }

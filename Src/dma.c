@@ -67,7 +67,16 @@ void MX_DMA_Init(void)
 }
 
 /* USER CODE BEGIN 2 */
+void DMA_HalfTransfer_Callback(DMA_HandleTypeDef *hdma)
+{
+  UpdateDmaPage(g_dma_page_a);
+}
 
+
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
+{
+  UpdateDmaPage(g_dma_page_b);
+}
 /* USER CODE END 2 */
 
 /**

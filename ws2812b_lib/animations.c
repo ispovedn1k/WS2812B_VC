@@ -1,4 +1,6 @@
 #include "animations.h"
+#include "colors.h"
+
 
 static inline void ClearFrame(led_unit_p frame);
 static inline void FillFrame(led_unit_p frame, led_unit_t val) ;

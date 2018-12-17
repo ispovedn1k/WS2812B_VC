@@ -60,7 +60,7 @@
 void MX_DMA_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void DMA_HalfTransfer_Callback(DMA_HandleTypeDef *hdma);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
