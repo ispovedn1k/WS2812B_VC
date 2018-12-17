@@ -20,6 +20,7 @@ void Animation_RunningLine(led_unit_p leds_frame, led_unit_p notUsed);
 void Animation_Train(led_unit_p leds_frame, led_unit_p notUsed);
 void Animation_DoubleTrain(led_unit_p leds_frame, led_unit_p prev_frame);
 void Animation_Rainbow(led_unit_p leds_frame, led_unit_p prev_frame);
+void Animation_Snake(led_unit_p leds_frame, led_unit_p notUsed);
 
 	 
 #ifdef __cplusplus

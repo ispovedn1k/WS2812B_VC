@@ -62,7 +62,7 @@ void SwapFrames(void);
  */
 void InitBuffers2812B()
 {
-	SetAnimation(Animation_DoubleTrain);
+	SetAnimation(Animation_Snake);
 	p_dma_frame = leds_frame_b;
 	p_clc_frame = leds_frame_a;
 	SetFrameEnd();

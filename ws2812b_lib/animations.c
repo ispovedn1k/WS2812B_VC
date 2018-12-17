@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "animations.h"
 #include "colors.h"
 
@@ -271,5 +272,47 @@ void Animation_Rainbow(HSV_p leds_frame, HSV_p prev_frame)
 	for(uint16_t i = 1; i < STRIP_LEDS_NUM; i++) {
 		leds_frame[i] = getNextRainbowColor(leds_frame[i-1], step);
 	}
+	frame++;
+}
+
+
+/**
+ *
+ */
+#define SNAKE_LENGTH		16
+
+void Animation_Snake(HSV_p leds_frame, HSV_p notUsed)
+{
+	static uint32_t	frame = 0;
+	static HSV_t	snake_colors[SNAKE_LENGTH];
+	static uint16_t	snake_positions[SNAKE_LENGTH];
+	static HSV_t	food_color;
+	static uint16_t food_position;
+
+	for (uint8_t i = SNAKE_LENGTH-1; i > 0; i--) // последние 2 должны быть чёрными, чтобы затирать хвост.
+	{
+		snake_positions[i] = snake_positions[i-1];
+		leds_frame[snake_positions[i]] = snake_colors[i];
+	}
+
+	if (snake_positions[0] > food_position) {
+		snake_positions[0]--;
+	}
+	else {
+		snake_positions[0]++;
+	}
+
+	if (snake_positions[0] == food_position)
+	{
+		for (uint8_t i = SNAKE_LENGTH-3; i > 0; i--) // последние 2 должны быть чёрными, чтобы затирать хвост.
+		{
+			snake_colors[i] = snake_colors[i-1];
+		}
+		snake_colors[0] = food_color;
+		food_color = GetRandomHsvColor();
+		food_position = rand() % STRIP_LEDS_NUM;
+	}
+
+	leds_frame[food_position] = food_color;
 	frame++;
 }
