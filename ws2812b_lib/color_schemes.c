@@ -15,9 +15,11 @@ RGB_t GetRandomRgbaColor(void)
 }
 
 
-inline HSV_t hsv(uint8_t h, uint8_t s, uint8_t v)
+inline HSV_t hsv(uint16_t h, uint8_t s, uint8_t v)
 {
 	return (HSV_t) { h, s, v };
+	// HSV_t t = {h, s, v};
+	// return t; // correct order
 }
 
 

@@ -1,1 +1,9 @@
 /Debug/
+/AC6 WS2812B_VC.cfg
+/AC6.cfg
+/WS2812B_VC Run.cfg
+/ws2812b_lib/hsv.c
+/ws2812b_lib/hsv.h
+/ws2812b_lib/rgb.c
+/ws2812b_lib/rgb.h
+/ws2812b_lib/unit_types.h

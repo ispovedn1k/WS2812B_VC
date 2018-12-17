@@ -35,7 +35,7 @@ typedef struct __HSV {
 RGB_t rgb(uint8_t r, uint8_t g, uint8_t b);
 RGB_t GetRandomRgbaColor(void);
 
-HSV_t hsv(uint8_t h, uint8_t s, uint8_t v);
+HSV_t hsv(uint16_t h, uint8_t s, uint8_t v);
 HSV_t GetRandomHsvColor(void);
 HSV_t HSV_ModBrightness(HSV_t led, int8_t mod);
 

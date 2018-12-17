@@ -217,6 +217,33 @@ void Animation_Train(HSV_p leds_frame, HSV_p notUsed)
 }
 
 
+/**
+ *
+ */
+void Animation_DoubleTrain(HSV_p leds_frame, HSV_p prev_frame)
+{
+	static HSV_t color1, color2;
+	static uint32_t position = STRIP_LEDS_NUM,
+					frame = 5;
+
+	for (uint32_t i = 0; i < STRIP_LEDS_NUM; i++) {
+		leds_frame[i] = HSV_ModBrightness(prev_frame[i], -1);
+	}
+
+	if (position == STRIP_LEDS_NUM) {
+		position = 0;
+		color1 = GetRandomHsvColor();
+		color2 = GetRandomHsvColor();
+	}
+
+	leds_frame[position] = color1;
+	leds_frame[STRIP_LEDS_NUM-1 - position] = color2;
+
+	position++;
+	frame++;
+}
+
+
 static inline HSV_t getNextRainbowColor(HSV_t current, const uint8_t step)
 {
 	current.H += step;
