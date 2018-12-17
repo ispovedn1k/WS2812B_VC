@@ -14,10 +14,13 @@ extern Animation_function volatile Animation;
 void SetAnimation(Animation_function Animation_function);
 
 void Animation_RunningLed(led_unit_p leds_frame, led_unit_p notUsed);
+void Animation_RunningLed2(led_unit_p leds_frame, led_unit_p prev_frame);
 void Animation_Pulse(led_unit_p leds_frame, led_unit_p notUsed);
 void Animation_RunningLine(led_unit_p leds_frame, led_unit_p notUsed);
 void Animation_Train(led_unit_p leds_frame, led_unit_p notUsed);
+void Animation_DoubleTrain(led_unit_p leds_frame, led_unit_p prev_frame);
 void Animation_Rainbow(led_unit_p leds_frame, led_unit_p prev_frame);
+
 	 
 #ifdef __cplusplus
 }

@@ -1,0 +1,25 @@
+@CHARSET "UTF-8";
+@import "bootstrap.min.css";
+
+canvas {
+	background-color: #000;
+	width: 640px;
+	height: 480px;
+	
+}
+
+.canvas-container {
+	padding: 10px;
+	border: 1px solid #444;
+}
+
+.blackbox {
+	height: 100px;
+	background-color: #444;
+}
+
+#c-sprigraph {
+	width: 800px;
+	height: 800px;
+	background-color: #000;
+}

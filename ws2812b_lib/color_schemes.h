@@ -7,6 +7,7 @@
 
 #define H_SECTOR_SIZE	256						// удобно использовать значения кратные 2^n, дабы упростить деление.
 #define MAX_H_VALUE		6 * H_SECTOR_SIZE		// с этого значения начинается обнуление.
+#define MAX_V_VALUE		0x40					// ограничение яркости
 
 #define SET_COLOR(PTR_LED, COLOR) {*((uint32_t *)(PTR_LED)) = COLOR;}
 
@@ -36,6 +37,7 @@ RGB_t GetRandomRgbaColor(void);
 
 HSV_t hsv(uint8_t h, uint8_t s, uint8_t v);
 HSV_t GetRandomHsvColor(void);
+HSV_t HSV_ModBrightness(HSV_t led, int8_t mod);
 
 RGB_t ConvertHsvToRgb(HSV_p hsv);			// переводит цвет формата hsv в rgb структуру, aplha всегда макс.
 

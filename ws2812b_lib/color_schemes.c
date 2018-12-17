@@ -24,7 +24,26 @@ inline HSV_t hsv(uint8_t h, uint8_t s, uint8_t v)
 inline HSV_t GetRandomHsvColor(void) 
 {
 	uint32_t r = rand();
-	return (HSV_t) { 6*(r & 0x000000FF), 255, 255 }; // @todo: сделать рандомизацию
+	return (HSV_t) { 6*(r & 0x000000FF), 255, MAX_V_VALUE }; // @todo: сделать рандомизацию
+}
+
+
+/**
+ *
+ */
+HSV_t HSV_ModBrightness(HSV_t led, int8_t mod)
+{
+	int16_t v = led.V;
+	v += mod;
+	if (v < 0) {
+		return hsv(led.H, led.S, 0);
+	}
+	else if (v > MAX_V_VALUE){
+		return hsv(led.H, led.S, 0);
+	}
+	else {
+		return hsv(led.H, led.S, v);
+	}
 }
 
 

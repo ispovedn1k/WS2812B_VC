@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8" />
+	<title>Canvas fun drugs</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="base.js"></script>
+</head>
+<body>
+	<div class="containter">
+	<main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
+		<div class="row">
+			<div class="col">
+				<canvas id="cp"></canvas>
+			</div>
+			<div class="col">
+				<label for="AnimationSelect">Animation:</label><br />
+				<select id="AnimationSelect" name="AnimationSelect">
+					<option value="0" disabled="disabled" selected="selected">Select the animation</option>
+				</select>
+				<br/>
+				<label for="animspeed">Speed:</label>
+					<input type="range" min="0" max="99" step="1" value="50" id="aniSpeed" />
+			</div>
+		</div>	
+	</main>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+(function(){
+	var cs = document.getElementById("cp");
+	cs.width = 640;
+	cs.height = 480;
+	var ctx = cs.getContext("2d");
+	ctx.fillStyle = "rgba(255,165,0,1)";	
+
+	
+//	var frame_buf = []; // массив из rgba значений светодиодов
+	var coords = [];
+	var a; // текущая анимация.
+	var timerDelay = 20;
+	
+	function initSelect() {
+		var select = document.getElementById("AnimationSelect");
+		if (! select) {
+			return;
+		}
+		for (var anim in AnimationsCollection) {
+			select.innerHTML += '<option value-"' + anim + '">' + anim + '</option>';
+		}
+		select.onchange = function(event) {
+			a = AnimationsCollection[select.value](300);
+		}
+	}
+	
+	function initSpeed() {
+		var el = document.getElementById("aniSpeed");
+		if (! el) {
+			console.log("Animation Speed element not found!");
+			return;
+		}
+		el.onchange = function(event) {
+			timerDelay = 4 + 1*(99 - el.value);
+			// alert(timerDelay);
+		}
+	}
+	
+	function calcCoords() {
+		var r = 10;
+		var teta = 0;
+		var t_inc = 0.5;
+		var r_inc = 7;
+		var interval;
+		var x, y;
+		
+		coords = [];
+		
+		for (var i = 0; i < 300; i++) {
+			var x = r * Math.cos(teta);
+			var y = r * Math.sin(teta);
+			var r2 = r + r_inc / Math.sqrt(i+1);
+			t_inc = Math.acos((r*r + r2*r2 - 625)/(2*r*r2));
+			teta += t_inc;
+			r = r2;
+			coords[i] = {x: x, y: y};
+		}
+		
+		coords.reverse();
+	}
+	
+	function draw(frame) {
+		var style = "";
+		ctx.clearRect(0, 0, 640, 480);
+		for (var i = 0; i < 300; i++) {
+			ctx.beginPath();
+			style = frame[i];
+			if (style) {
+				if (typeof style === "object") {
+					style = hslToString(style);
+				}
+			}
+			else {
+				style = 'black';
+			}
+			ctx.fillStyle = style;	
+			ctx.fillRect(318+coords[i].x, 248-coords[i].y, 5, 5);
+			ctx.closePath();
+		}
+	}
+	
+	function drawNextFrame() {
+		draw(a.nextFrame());
+	}
+	
+	function random_rgb() {
+		var o = Math.round, r = Math.random, s = 255;
+		return 'rgb(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ')';
+		//return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
+	}
+	
+	function random_rgba(alpha) {
+		return {
+			r: Math.round(Math.random() * 255),
+			g: Math.round(Math.random() * 255),
+			b: Math.round(Math.random() * 255),
+			a: alpha ? alpha : Math.random(),
+		}
+	}
+	
+	function rgba2String(rgba) {
+		return 'rgba(' + rgba.r + ',' + rgba.g + ',' + rgba.b + ',' + rgba.a + ')';
+	}
+	
+	function hslToString(hsl) {
+		return 'hsl(' + hsl.h + ',' + hsl.s + '%,' + hsl.l +'%)';
+	}
+	
+	function random_hsl() {
+		return {h: Math.round(360 * Math.random()), s: 100, l: 50};
+	}
+	
+	function fillRandom(num) {
+		var buff = [];
+		for (var i = 0; i < num; i++) {
+			buff[i] = random_hsl();
+		}
+		return buff;
+	}
+				
+	function getRandomPosition(l) {
+		return Math.floor(l * Math.random());
+	}
+	
+	function hslModLed(hsl_color, mod) {
+		hsl_color.l += mod;
+		if (hsl_color.l < 0) {
+			hsl_color.l = 0;
+		}
+		if (hsl_color.l > 100) {
+			hsl_color.l = 100;
+		}
+		return hsl_color;
+	}
+	
+	var AnimationsCollection = {
+		RunningLed: (function(NUM_LEDS) {
+			var instance = {};
+			var frame_counter = 0;
+			var frame_buf = [];
+			var color = 'red';
+			
+			instance.nextFrame = function() {
+				for (var i = 0; i < frame_counter; i++) {
+					frame_buf[i] = color;
+				} 
+				frame_counter++;
+				if (frame_counter > NUM_LEDS) {
+					frame_counter = 0;
+					if (color == 'black') {
+						color = rgba2String(random_rgba(1));
+					}
+					else {
+						color = 'black';
+					}
+				}
+				return frame_buf;
+			};
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				frame_buf = [];
+			};
+			
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		RunningLed2: (function(NUM_LEDS) {
+			var instance = {};
+			var frame_counter = 0;
+			var frame_buf = [];
+			var heads = [];
+			var separation = 10;
+			var heads_length = 1+ Math.floor(NUM_LEDS / separation);
+			var fade_speed = -5;
+			
+			instance.nextFrame = function() {
+				for (var i = 0; i < NUM_LEDS; i++) {
+					frame_buf[i] = hslModLed(frame_buf[i], fade_speed);
+				}
+				
+				for (var i = 0; i < heads_length; i++) {
+					heads[i].position += 1;
+					if (heads[i].position > NUM_LEDS + separation) {
+						heads[i].position = 0;
+						heads[i].color = random_hsl();
+					}
+					if (heads[i].position < NUM_LEDS) {
+						frame_buf[heads[i].position] = Object.assign({}, heads[i].color);
+					}
+				}
+				
+				return frame_buf;
+			};
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				for (var i = 0; i < NUM_LEDS; i++) {
+					frame_buf[i] = random_hsl();
+				}
+				for (var i = 0; i < heads_length; i++) {
+					heads[i] = {
+						position: i * separation,
+						color: random_hsl(),
+					}
+				}
+			};
+			
+			return function() {
+				instance.restart();
+				return instance;
+			}
+		}(300)),
+		
+		Pulse: (function(NUM_LEDS){
+			var instance = {};
+			var frame_counter = 0;
+			var frame_buf = [];
+			var color;
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				color = random_hsl();
+				color.l = 0;
+			};
+			
+			instance.nextFrame = function() {				
+				for (var i = 0; i < NUM_LEDS; i++) {
+					frame_buf[i] = color;
+				}
+				
+				if (frame_counter < 50) {
+					color.l++;
+				} else {
+					color.l--;
+				}
+				if (frame_counter == 100) {
+					instance.restart();
+				}
+				
+				frame_counter += 1;
+				
+				return frame_buf;
+			};
+			
+			instance.restart();
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		Train: (function(NUM_LEDS){
+			var instance = {};
+			var train_position = 0;
+			var frame_buf = [];
+			var color_rgba = { r: 128, g: 128, b: 0, a: 1 };
+			var color_text = '';
+			var direction = 1; // or -1
+			var train = [
+				rgba2String({ r: 128, g: 128, b: 255, a: 0.2 }), 
+				rgba2String({ r: 128, g: 128, b: 255, a: 0.4 }), 
+				rgba2String({ r: 128, g: 128, b: 255, a: 0.8 }), 
+				rgba2String({ r: 128, g: 128, b: 255, a: 1.0 }), 
+				rgba2String({ r: 128, g: 128, b: 255, a: 0.6 })
+			];
+			
+			instance.nextFrame = function() {
+				for (var i = 0; i < NUM_LEDS; i++) {
+					frame_buf[i] = 'black';
+				}
+				for (var i = 0; i < train.length; i++) {
+					var vagon_pos = train_position + i*direction;
+					if (vagon_pos >= 0 && vagon_pos < NUM_LEDS) {
+						frame_buf[vagon_pos] = train[i];
+					}
+				}
+				
+				train_position += direction;
+				if (train_position == NUM_LEDS) {
+					direction = -1;
+				}
+				if (train_position == 0) {
+					direction = 1;
+					color_rgba = random_rgba();
+					train = [
+						rgba2String({
+							r: color_rgba.r,
+							g: color_rgba.g,
+							b: color_rgba.b,
+							a: 0.2,
+						}),
+						rgba2String({
+							r: color_rgba.r,
+							g: color_rgba.g,
+							b: color_rgba.b,
+							a: 0.4,
+						}),
+						rgba2String({
+							r: color_rgba.r,
+							g: color_rgba.g,
+							b: color_rgba.b,
+							a: 0.8,
+						}),
+						rgba2String({
+							r: color_rgba.r,
+							g: color_rgba.g,
+							b: color_rgba.b,
+							a: 1.0,
+						}),
+						rgba2String({
+							r: color_rgba.r,
+							g: color_rgba.g,
+							b: color_rgba.b,
+							a: 0.7,
+						})
+					];
+				}				
+				
+				return frame_buf;
+			};
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				frame_buf = [];
+			};
+			
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		LongTrain: (function(NUM_LEDS){
+			var instance = {};
+			var head_position = 0;
+			var frame_buf = [];
+			var direction = 1; // or -1
+			var train_length = 20;
+			var train = [ ];
+			var color = random_hsl();
+			
+			instance.nextFrame = function() {
+				frame_buf[train[train_length-1].position] = 'black';
+				for (var i = 1; i < train_length; i++) {
+					train[train_length-i].position = train[train_length-i-1].position;
+					frame_buf[train[train_length-1-i].position] = train[train_length-1-i].color;
+				}
+				
+				head_position += direction;
+				train[0].position = head_position;
+				if (head_position == NUM_LEDS) {
+					direction = -1;
+				}
+				if (head_position == 0) {
+					direction = 1;
+					instance.restart();
+				}				
+				
+				return frame_buf;
+			};
+			
+			instance.restart = function() {
+				color = random_hsl();
+				head_position = 0;
+				frame_buf = [];
+				for (var i = 0; i < train_length; i++) {
+					train[i] = {
+						position: 0,
+						color: (function(c){return {h: c.h, s: c.s, l: c.l}})(color),
+					};
+					train[i].color.l = Math.floor(70- 60.0*i/train_length);
+				}
+			};
+			
+			instance.restart();
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		DoubleTrain: (function(NUM_LEDS) {
+			var instance = {};
+			var frame_counter = 0;
+			var frame_buf = [];
+			var fade_speed = 5;
+			var position = NUM_LEDS;
+			var color1, color2;
+			
+			instance.nextFrame = function() {
+				for (var i = 0; i < NUM_LEDS; i++) {
+					frame_buf[i] = hslModLed(frame_buf[i], -1);
+				}
+				
+				if (position == NUM_LEDS) {
+					position = 0;
+					color1 = random_hsl();
+					color2 = random_hsl();
+				}
+				
+				frame_buf[position] = Object.assign({}, color1);
+				frame_buf[NUM_LEDS-1 - position] = Object.assign({}, color2);
+				
+				position++;
+				frame_counter++;
+				
+				return frame_buf;
+			};
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				position = NUM_LEDS;
+				for (var i = 0; i < NUM_LEDS; i++) {
+					frame_buf[i] = {h:0, s: 0, l: 0};
+				}
+			};
+			
+			return function() {
+				instance.restart();
+				return instance;
+			}
+		}(300)),
+		
+		MarbleTube: (function(NUM_LEDS) {
+			var instance = {};
+			var frame_buf = [];
+			var color = 'red';
+			var marbles_num = 0;
+			var marble_position = 0;
+			
+			instance.nextFrame = function() {
+				if (marble_position == 0) {
+					//generate marble color
+					color = hslToString(random_hsl());
+				}
+				frame_buf[marble_position] = color;
+				if (marble_position) {
+					frame_buf[marble_position -1] = 'black';
+				}
+				marble_position++;
+				
+				if (marble_position == NUM_LEDS-marbles_num) {
+					marble_position = 0;
+					marbles_num++;
+					if (marbles_num == NUM_LEDS) {
+						//заполнено всё
+						instance.restart();
+					}
+				}
+				return frame_buf;
+			};
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				marbles_num = 0;
+				frame_buf = [];
+			};
+			
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		MarbleTube2: (function(NUM_LEDS) {
+			var instance = {};
+			var frame_buf = [];
+			var frame_counter = 0;
+			var end = NUM_LEDS-1;
+			
+			instance.nextFrame = function() {
+				for (var i = end; i > 0; i--) {
+					frame_buf[i] = frame_buf[i-1];
+				}
+								
+				if (frame_counter % 8 == 0) {
+					frame_buf[0] = random_hsl();
+				}
+				else {
+					frame_buf[0] = 'black';
+				}
+				
+				if (frame_buf[end] != 'black') {
+					end--;
+					if (end < 0) {
+						instance.restart();
+					}
+				}
+				
+				frame_counter++;
+				return frame_buf;
+			};
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				end = NUM_LEDS-1;
+							
+				for (var i = 0; i < NUM_LEDS; i++) {
+					frame_buf[i] = 'black';
+				}
+			};
+			
+			instance.restart();
+			
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		Wave: (function(NUM_LEDS) {
+			var instance = {};
+			var frame_counter = 0;
+			var frame_buf = [];
+			var k_wave_length = 16;
+			var wave_counter = 0;
+			
+			(function(){
+				for (var i = 0; i < NUM_LEDS; i++) {
+					frame_buf[i] = random_hsl();
+				}
+			}())
+			
+			instance.nextFrame = function() {
+				var out= []
+				if (frame_counter % 4 == 1) {
+					for (var i = 0; i < NUM_LEDS; i++) {
+						frame_buf[i].l = 40+2*((i+wave_counter) % k_wave_length);
+						out[i] = hslToString(frame_buf[i]);
+					}
+					wave_counter++;
+				}
+				else {
+					for (var i = 0; i < NUM_LEDS; i++) {
+						out[i] = hslToString(frame_buf[i]);
+					}
+				}
+				frame_counter++;
+				return out;
+			};
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				frame_buf = [];
+			};
+			
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		Rainbow: (function(NUM_LEDS){
+			var instance = {};
+			var frame_counter = 0;
+			var frame_buf = [];
+			var step = Math.ceil(360 / NUM_LEDS);
+			
+			frame_buf[0] = {h: 0, s: 100, l: 50};
+			
+			function next(v) {
+				var n = v + step;
+				return (n >=360) ? n - 360 : n;
+			}
+			
+			for (var i = 1; i < NUM_LEDS; i++) {
+				frame_buf[i] = {
+					h: next(frame_buf[i-1].h),
+					s: 100,
+					l: 50
+				};
+			}
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				frame_buf = [];
+			};
+			
+			instance.nextFrame = function() {
+				for (var i = 0; i < NUM_LEDS; i++) {
+					frame_buf[i] = {
+						h: next(frame_buf[i].h),
+						s: 100,
+						l: 50
+					};
+				} //*/
+				return frame_buf;
+			};
+			
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		Dropdown: (function(NUM_LEDS){
+			var instance = {};
+			var frame_counter = 0;
+			var frame_buf = [];
+			var delay = 50;
+			var counter = 0;
+			var end = NUM_LEDS -1;
+			
+			frame_buf = fillRandom(NUM_LEDS);
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				frame_buf = [];
+			};
+			
+			instance.nextFrame = function() {
+				if (frame_counter > delay) {
+					delay--;
+					frame_counter = 0;
+					
+					for(var i = 0; i < end; i++)
+					{
+						frame_buf[i] = frame_buf[i+1];
+					}
+					
+					frame_buf[end] = 'black';
+					end--;
+				}
+				
+				frame_counter++;
+				counter++;
+				return frame_buf;
+			};
+			
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		Dropdown_sp: (function(NUM_LEDS){
+			var instance = {};
+			var frame_counter = 0;
+			var frame_buf = [];
+			var delay = 50;
+			var counter = 0;
+			var end = NUM_LEDS -1;
+			var head = 0;
+			var gonzales = 0;
+			
+			frame_buf = fillRandom(NUM_LEDS);
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				frame_buf = [];
+			};
+			
+			instance.nextFrame = function() {
+				if (gonzales == 0) {
+					frame_buf[0] = 'black';
+					gonzales = head;
+					head++;
+				}
+				else {
+					frame_buf[gonzales -1] = frame_buf[gonzales];
+					frame_buf[gonzales] = 'black';
+					gonzales--;
+				}
+				
+				if (frame_counter > delay) {
+					delay--;
+					frame_counter = 0;
+					
+					for(var i = 0; i < end; i++)
+					{
+						frame_buf[i] = frame_buf[i+1];
+					}
+					
+					frame_buf[end] = 'black';
+					end--;
+					head--;
+				}
+				
+				frame_counter++;
+				counter++;
+				return frame_buf;
+			};
+			
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		Drop2: (function(NUM_LEDS){
+			var instance = {};
+			var frame_counter = 1;
+			var frame_buf = [];
+			var tr_position = 1;
+			var tr_position2 = 1;
+		
+			frame_buf = fillRandom(NUM_LEDS);
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				tr_position = 1;
+				tr_position2 = 1;
+				frame_buf = fillRandom(NUM_LEDS);;
+			};
+			
+			instance.nextFrame = function() {
+				for (var i = 1; i < tr_position; i++) {
+					frame_buf[i-1] = frame_buf[i];
+					frame_buf[i] = 'black';
+				}
+				
+				if (frame_counter % 4 == 0) {
+					for (var i = tr_position; i < tr_position2; i++) {
+						frame_buf[i-1] = frame_buf[i];
+						frame_buf[i] = 'black';
+					}
+				}
+				
+				if (frame_counter % 16 == 0) {
+					for (var i = tr_position2; i < NUM_LEDS; i++) {
+						frame_buf[i-1] = frame_buf[i];
+						frame_buf[i] = 'black';
+					}
+				}
+				
+				if (frame_counter % 8 == 0) {
+					tr_position++;
+					tr_position2 = tr_position * tr_position;
+				}
+				
+				frame_counter++;
+				
+				if (frame_counter == 1000) { // подобрал наугад
+					instance.restart();
+				}
+				return frame_buf;
+			};
+			
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		Snake: (function(NUM_LEDS){
+			var instance = {};
+			var frame_buf = [];
+			var snake = [
+				{color: 'red', position: 0},
+				{color: 'red', position: 0},
+				{color: 'red', position: 0},
+				{color: 'red', position: 0},
+			];
+			var food = {
+				color: 'green', position: getRandomPosition(NUM_LEDS)
+			};
+			
+			instance.restart = function() {
+				frame_buf[food.position] = food.color;
+			};
+			
+			instance.nextFrame = function() {				
+				var tail = snake[3].position;
+				snake[3].position = snake[2].position;
+				snake[2].position = snake[1].position;
+				snake[1].position = snake[0].position;
+				
+				if (snake[0].position > food.position) {
+					snake[0].position--;
+				}
+				else {
+					snake[0].position++;
+				}
+											
+				frame_buf[tail] = 'black';
+				frame_buf[snake[0].position] = snake[0].color;
+				frame_buf[snake[1].position] = snake[1].color;
+				frame_buf[snake[2].position] = snake[2].color;
+				frame_buf[snake[3].position] = snake[3].color;
+				
+				if (snake[0].position == food.position) {
+					snake[3].color = snake[2].color;
+					snake[2].color = snake[1].color;
+					snake[1].color = snake[0].color;
+					snake[0].color = food.color;
+					food.color = random_hsl();
+					food.position = getRandomPosition(NUM_LEDS);
+					frame_buf[food.position] = food.color;
+				}
+				
+				return frame_buf;
+			};
+			
+			instance.restart();
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		RoundDance: (function(NUM_LEDS) {
+			var instance = {};
+			var frame_counter = 0;
+			var frame_buf = [];
+			var sep = 15;
+			var color = random_hsl();
+			
+			instance.nextFrame = function() {
+				frame_counter++;
+				var h = color.h+1;
+				color.h = h < 360 ? h : h-360;
+				for (var i = NUM_LEDS-1; i > 0; i--) {
+					frame_buf[i] = frame_buf[i-1];
+				}
+				if (frame_counter % sep == 0) {
+					frame_buf[0] = color;
+				}
+				else {
+					frame_buf[0] = 'black';
+				}
+				
+				return frame_buf;
+			};
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				for (var i = 0; i < NUM_LEDS; i++) {
+					if (i % sep == 0) {
+						frame_buf[i] = color;
+					}
+					else {
+						frame_buf[i] = 'black';
+					}
+				}
+			};
+			
+			instance.restart();
+			return function() {
+				return instance;
+			}
+		}(300)),
+		
+		Stars: (function(NUM_LEDS) {
+			var instance = {};
+			var frame_counter = 0;
+			var frame_buf = [];
+			
+			instance.nextFrame = function() {
+				for (var i = 0; i < NUM_LEDS; i++) {
+					if (0.1 < Math.random()) {
+						hslModLed(frame_buf[i], -3)
+					}
+					else {
+						hslModLed(frame_buf[i], 15);
+					}
+				}
+				
+				return frame_buf;
+			};
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				for (var i = 0; i < NUM_LEDS; i++) {
+					frame_buf[i] = random_hsl();
+					frame_buf[i].l = 0;
+				}
+			};
+			
+			return function() {
+				instance.restart();
+				return instance;
+			}
+		}(300)),
+		
+		Stars2: (function(NUM_LEDS) {
+			var instance = {};
+			var frame_counter = 0;
+			var frame_buf = [];
+			var stars = []
+			var stars_num = 30;
+			
+			instance.nextFrame = function() {
+				for (var i = 0; i < stars_num; i++) {
+					hslModLed(frame_buf[stars[i].position], -1);
+					
+					if (0.3 > Math.random()) {
+						hslModLed(frame_buf[stars[i].position], 3);
+					}
+					
+					if ( frame_buf[stars[i].position].l < 10 ) {
+						frame_buf[stars[i].position].l = 0;
+						stars[i] = {
+							position: Math.floor(NUM_LEDS * Math.random()),
+							color: random_hsl()
+						}
+						frame_buf[stars[i].position] = Object.assign({}, stars[i].color);
+					}
+				}
+				
+				return frame_buf;
+			};
+			
+			instance.restart = function() {
+				frame_counter = 0;
+				
+				for (var i = 0; i < NUM_LEDS; i++) {
+					frame_buf[i] = random_hsl();
+					frame_buf[i].l = 0;
+				}
+				
+				for (var i = 0; i < stars_num; i++) {
+					stars[i] = {
+						position: Math.floor(NUM_LEDS * Math.random()),
+						color: random_hsl()
+					}
+					frame_buf[stars[i].position] = Object.assign({}, stars[i].color);
+				}
+			};
+			
+			return function() {
+				instance.restart();
+				return instance;
+			}
+		}(300)),
+		
+		// stars
+	}
+
+	initSelect();
+	initSpeed();
+	calcCoords();
+	a = AnimationsCollection["Stars2"]();
+	function r() {
+		drawNextFrame(),
+		setTimeout(r, timerDelay);
+	}
+	r();
+	// interval = setInterval(drawNextFrame, 20);
+})();
+</script>

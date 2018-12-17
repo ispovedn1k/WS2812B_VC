@@ -89,6 +89,28 @@ void Animation_RunningLed(HSV_p leds_frame, HSV_p notUsed)
 /**
  *
  */
+void Animation_RunningLed2(HSV_p leds_frame, HSV_p prev_frame)
+{
+	static uint32_t frame = 0;
+
+	for (uint16_t i = 0; i < STRIP_LEDS_NUM-1; i++) {
+		leds_frame[i+1] = prev_frame[i];
+	}
+
+	if (frame % 16 == 0) {
+		leds_frame[0] = GetRandomHsvColor();
+	}
+	else {
+		leds_frame[0] = HSV_ModBrightness(prev_frame[0], -5);
+	}
+
+	frame++;
+}
+
+
+/**
+ *
+ */
 void Animation_Pulse(HSV_p leds_frame, HSV_p notUsed)
 {
 	const uint32_t preset_colors[8] = {HSV_GREEN, HSV_RED, HSV_BLUE, HSV_YELLOW, HSV_MAGENTA, HSV_CYAN, HSV_WHITE, LED_OFF};
