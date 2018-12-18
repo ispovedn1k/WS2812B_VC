@@ -372,3 +372,97 @@ void Animation_Stars(HSV_p leds_frame, HSV_p prev_frame)
 
 #undef STAR
 }
+
+
+/**
+ *
+ */
+void Animation_RoundDance(HSV_p leds_frame, HSV_p prev_frame)
+{
+	static uint32_t frame = 0;
+	static uint16_t H = 0;
+
+	for (uint16_t i = STRIP_LEDS_NUM-1; i > 0; i--)
+	{
+		leds_frame[i] = prev_frame[i-1];
+	}
+
+	if (frame % 16 == 0) // 16 separation
+	{
+		leds_frame[0] = hsv(H, 0xFF, MAX_V_VALUE);
+	}
+	else
+	{
+		leds_frame[0].V = 0;
+	}
+
+	H++;
+	if (H == MAX_H_VALUE)
+	{
+		H = 0;
+	}
+	frame++;
+}
+
+
+/**
+ *
+ */
+void Animation_MarbleTube(HSV_p leds_frame, HSV_p prev_frame)
+{
+	static uint32_t frame = 0;
+	static uint16_t end = STRIP_LEDS_NUM; // последний стоящий СД
+	uint16_t i;
+
+	for (i = end-1; i > 0; i--)
+	{
+		leds_frame[i] = prev_frame[i-1];
+	}
+
+	if (frame % 16 == 0 )
+	{
+		leds_frame[0] = GetRandomHsvColor();
+	}
+	else
+	{
+		SET_COLOR(&leds_frame[0], LED_OFF);
+	}
+
+	leds_frame[end] = prev_frame[end];
+
+	// wave pulse
+	for (i = STRIP_LEDS_NUM-1; i > end; i--)
+	{
+		leds_frame[i].S = prev_frame[i-1].S; // передача пульсации
+	}
+
+	if (end < STRIP_LEDS_NUM) // сглаживание пульсации
+	{
+		uint16_t S = leds_frame[end].S + 0x01;
+		if (S > 0xFF)
+		{
+			S = 0xFF;
+		}
+		leds_frame[end].S = S;
+	}
+
+	if (end < STRIP_LEDS_NUM	&&	(frame % 32 == 0)) // для пульсации уже стоящих, чтобы скучно не было.
+	{
+		leds_frame[end].S = 0x10;
+	}
+
+
+	if (leds_frame[end-1].V != 0) // прицепился ещё один
+	{
+		end--; // увеличиваем цепь стоящих
+
+		if (end == 0) // длина цепи = вся лента
+		{ // restart
+			end = STRIP_LEDS_NUM-1;
+			ClearFrame(leds_frame);
+			frame = 0;
+		}
+	}
+
+	frame++;
+}
