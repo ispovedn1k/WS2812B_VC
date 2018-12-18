@@ -62,7 +62,7 @@ void SwapFrames(void);
  */
 void InitBuffers2812B()
 {
-	SetAnimation(Animation_Snake);
+	SetAnimation(Animation_Stars);
 	p_dma_frame = leds_frame_b;
 	p_clc_frame = leds_frame_a;
 	SetFrameEnd();
@@ -115,7 +115,8 @@ bit_unit_p SetDmaSingleLedReset(bit_unit_p pPWM_buff)
  */
 void SetDmaPageValue(bit_unit_p dma, bit_unit_t val)
 {	// заполняем всю страницу буфера значением
-	for (uint16_t i = 0; i < DMA_PAGE_LENGTH; i++) {
+	for (uint16_t i = 0; i < DMA_PAGE_LENGTH; i++)
+	{
 		dma[i] = val;
 	}
 }

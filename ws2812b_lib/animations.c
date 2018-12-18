@@ -94,14 +94,17 @@ void Animation_RunningLed2(HSV_p leds_frame, HSV_p prev_frame)
 {
 	static uint32_t frame = 0;
 
-	for (uint16_t i = 0; i < STRIP_LEDS_NUM-1; i++) {
+	for (uint16_t i = 0; i < STRIP_LEDS_NUM-1; i++)
+	{
 		leds_frame[i+1] = prev_frame[i];
 	}
 
-	if (frame % 16 == 0) {
+	if (frame % 16 == 0)
+	{
 		leds_frame[0] = GetRandomHsvColor();
 	}
-	else {
+	else
+	{
 		leds_frame[0] = HSV_ModBrightness(prev_frame[0], -5);
 	}
 
@@ -118,20 +121,25 @@ void Animation_Pulse(HSV_p leds_frame, HSV_p notUsed)
 	HSV_t color;
 	static uint8_t frame = 0, stage = 0;
 	
-	// USE_ALPHA required!
-			
 	SET_COLOR(&color, preset_colors[stage]);
-	if (frame > 0x40) {
+
+	if (frame > 0x40)
+	{
 		color.V = 0x80 - frame;
 	}
-	else {
+	else
+	{
 		color.V = frame;
 	}
+
 	frame++;
-	if (frame == 0x80) {
+
+	if (frame == 0x80)
+	{
 		frame = 0;
 		stage++;
-		if (stage == 7) {
+		if (stage == 7)
+		{
 			stage = 0;
 		}
 	}
@@ -204,7 +212,9 @@ void Animation_Train(HSV_p leds_frame, HSV_p notUsed)
 	for (uint8_t i = 0; i < 5; i++)
 	{
 		int32_t carriage_position = train_position + i*speed;
-		if (carriage_position >= 0 && carriage_position < STRIP_LEDS_NUM) {
+
+		if (carriage_position >= 0 && carriage_position < STRIP_LEDS_NUM)
+		{
 			leds_frame[carriage_position] = train[i];
 		}
 	}
@@ -227,11 +237,13 @@ void Animation_DoubleTrain(HSV_p leds_frame, HSV_p prev_frame)
 	static uint32_t position = STRIP_LEDS_NUM,
 					frame = 5;
 
-	for (uint32_t i = 0; i < STRIP_LEDS_NUM; i++) {
+	for (uint32_t i = 0; i < STRIP_LEDS_NUM; i++)
+	{
 		leds_frame[i] = HSV_ModBrightness(prev_frame[i], -1);
 	}
 
-	if (position == STRIP_LEDS_NUM) {
+	if (position == STRIP_LEDS_NUM)
+	{
 		position = 0;
 		color1 = GetRandomHsvColor();
 		color2 = GetRandomHsvColor();
@@ -248,7 +260,8 @@ void Animation_DoubleTrain(HSV_p leds_frame, HSV_p prev_frame)
 static inline HSV_t getNextRainbowColor(HSV_t current, const uint8_t step)
 {
 	current.H += step;
-	if (current.H >= MAX_H_VALUE) {
+	if (current.H >= MAX_H_VALUE)
+	{
 		current.H -= MAX_H_VALUE;
 	}
 	return current;
@@ -261,15 +274,18 @@ void Animation_Rainbow(HSV_p leds_frame, HSV_p prev_frame)
 	const uint8_t step = MAX_H_VALUE / STRIP_LEDS_NUM;
 	static uint32_t frame = 0;
 	
-	if (!frame) {
+	if (!frame)
+	{
 		leds_frame[0] = hsv(0, 255, 0x40);
 	}
-	else {	
+	else
+	{
 		leds_frame[0] = getNextRainbowColor(prev_frame[0], 1);
 		
 	}
 			
-	for(uint16_t i = 1; i < STRIP_LEDS_NUM; i++) {
+	for(uint16_t i = 1; i < STRIP_LEDS_NUM; i++)
+	{
 		leds_frame[i] = getNextRainbowColor(leds_frame[i-1], step);
 	}
 	frame++;
@@ -295,10 +311,12 @@ void Animation_Snake(HSV_p leds_frame, HSV_p notUsed)
 		leds_frame[snake_positions[i]] = snake_colors[i];
 	}
 
-	if (snake_positions[0] > food_position) {
+	if (snake_positions[0] > food_position)
+	{
 		snake_positions[0]--;
 	}
-	else {
+	else
+	{
 		snake_positions[0]++;
 	}
 
@@ -315,4 +333,42 @@ void Animation_Snake(HSV_p leds_frame, HSV_p notUsed)
 
 	leds_frame[food_position] = food_color;
 	frame++;
+}
+
+
+/**
+ *
+ */
+#define STARS_NUM	10
+
+void Animation_Stars(HSV_p leds_frame, HSV_p prev_frame)
+{
+#define		STAR	leds_frame[stars[i]]
+
+	static uint32_t stars[STARS_NUM];
+	static uint32_t frame = 0;
+
+	for (uint16_t i = 0; i < STRIP_LEDS_NUM; i++) {
+		leds_frame[i] = HSV_ModBrightness(prev_frame[i], -1);
+	}
+
+
+	for (uint8_t i = 0; i < STARS_NUM; i++)
+	{
+		if (rand() < (RAND_MAX / 4))
+		{
+			STAR = HSV_ModBrightness(STAR, 3);
+		}
+
+		if (STAR.V < 2)
+		{
+			STAR.V = 0;
+			stars[i] = rand() % STRIP_LEDS_NUM;
+			STAR = GetRandomHsvColor();
+		}
+	}
+
+	frame++;
+
+#undef STAR
 }

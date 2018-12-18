@@ -37,13 +37,16 @@ HSV_t HSV_ModBrightness(HSV_t led, int8_t mod)
 {
 	int16_t v = led.V;
 	v += mod;
-	if (v < 0) {
+	if (v < 0)
+	{
 		return hsv(led.H, led.S, 0);
 	}
-	else if (v > MAX_V_VALUE){
+	else if (v > MAX_V_VALUE)
+	{
 		return hsv(led.H, led.S, 0);
 	}
-	else {
+	else
+	{
 		return hsv(led.H, led.S, v);
 	}
 }
@@ -51,11 +54,13 @@ HSV_t HSV_ModBrightness(HSV_t led, int8_t mod)
 
 RGB_t ConvertHsvToRgb(HSV_p hsv)
 {
-	if (hsv->S == 0) { // насыщенность цвета никакая, можно ничего не считать.
+	if (hsv->S == 0)
+	{ // насыщенность цвета никакая, можно ничего не считать.
 		return rgb(hsv->V, hsv->V, hsv->V);
 	}
 
-	if (hsv->H >= MAX_H_VALUE) {
+	if (hsv->H >= MAX_H_VALUE)
+	{
 		hsv->H = 0; // коррекция для неверного диапазона (откуда бы ему взяться?)
 	}
 
