@@ -12,6 +12,7 @@ typedef void (* Animation_function)(led_unit_p, led_unit_p); // указател
 extern Animation_function volatile Animation;
 
 void SetAnimation(Animation_function Animation_function);
+uint8_t isAnimationComplete();
 
 void Animation_RunningLed(led_unit_p leds_frame, led_unit_p notUsed);
 void Animation_RunningLed2(led_unit_p leds_frame, led_unit_p prev_frame);

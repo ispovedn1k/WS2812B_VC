@@ -46,7 +46,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "animations.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,6 +88,18 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  Animation_function sequences[10] = {
+	Animation_MarbleTube,
+	Animation_Dropdown,
+	Animation_RunningLed2,
+	Animation_Pulse,
+	Animation_Rainbow,
+	Animation_DoubleTrain,
+	ClearFrame,
+	Animation_Snake,
+	Animation_Stars,
+	Animation_RoundDance
+  };
 
   /* USER CODE END 1 */
 
@@ -118,9 +130,21 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uint8_t i = 0;
+  SetAnimation(sequences[i]);
+
   while (1)
   {
     CalcNextFrame();
+    if (isAnimationComplete())
+    {
+    	i++;
+    	if (i > 9)
+    	{
+    		i = 0;
+    	}
+    	SetAnimation(sequences[i]);
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
