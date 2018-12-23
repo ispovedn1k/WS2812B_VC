@@ -3,8 +3,7 @@
 #include "colors.h"
 
 
-static inline void ClearFrame(led_unit_p frame);
-static inline void FillFrame(led_unit_p frame, led_unit_t val) ;
+static inline void FillFrame(led_unit_p frame, uint32_t val) ;
 /**
  *
  */
@@ -13,23 +12,20 @@ Animation_function volatile Animation;
 /**
  *
  */
-static inline void ClearFrame(led_unit_p frame)
+void ClearFrame(led_unit_p frame, led_unit_p prev_frame)
 {
-	for(uint32_t i = 0; i < STRIP_LEDS_NUM; i++)
-	{
-		SET_COLOR(&frame[i], LED_OFF);
-	}
+	FillFrame(frame, LED_OFF);
 }
 
 
 /**
  *
  */
-static inline void FillFrame(led_unit_p frame, led_unit_t val) 
+static inline void FillFrame(led_unit_p frame, uint32_t val)
 {
 	for(uint32_t i = 0; i < STRIP_LEDS_NUM; i++)
 	{
-		SET_COLOR(&frame[i], *(uint32_t*)&val);
+		SET_COLOR(&frame[i], val);
 	}
 }
 
@@ -51,8 +47,8 @@ void Animation_RunningLed(HSV_p leds_frame, HSV_p notUsed)
 	static uint32_t frame = 0, stage = 0, color = HSV_GREEN;
 	const uint32_t preset_colors[8] = {HSV_GREEN, HSV_RED, HSV_BLUE, HSV_YELLOW, HSV_MAGENTA, HSV_CYAN, HSV_WHITE, LED_OFF};
 	
-	ClearFrame(leds_frame);
-	
+	FillFrame(leds_frame, LED_OFF); // ClearFrame
+
 	if (stage % 2 == 0) // прямой ход
 	{
 		SET_COLOR(&leds_frame[frame], color);
@@ -118,18 +114,18 @@ void Animation_RunningLed2(HSV_p leds_frame, HSV_p prev_frame)
 void Animation_Pulse(HSV_p leds_frame, HSV_p notUsed)
 {
 	const uint32_t preset_colors[8] = {HSV_GREEN, HSV_RED, HSV_BLUE, HSV_YELLOW, HSV_MAGENTA, HSV_CYAN, HSV_WHITE, LED_OFF};
-	HSV_t color;
+	HSV_ut color;
 	static uint8_t frame = 0, stage = 0;
 	
 	SET_COLOR(&color, preset_colors[stage]);
 
 	if (frame > 0x40)
 	{
-		color.V = 0x80 - frame;
+		color.HSV.V = 0x80 - frame;
 	}
 	else
 	{
-		color.V = frame;
+		color.HSV.V = frame;
 	}
 
 	frame++;
@@ -144,7 +140,7 @@ void Animation_Pulse(HSV_p leds_frame, HSV_p notUsed)
 		}
 	}
 		
-	FillFrame(leds_frame, color);
+	FillFrame(leds_frame, color.ui);
 }
 
 
@@ -191,8 +187,8 @@ void Animation_Train(HSV_p leds_frame, HSV_p notUsed)
 	static int32_t train_position = -3;
 	static int8_t speed;
 	
-	ClearFrame(leds_frame);
-	
+	FillFrame(leds_frame, LED_OFF); // ClearFrame
+
 	if (train_position <= -3) 
 	{
 		speed = 1;
@@ -299,6 +295,7 @@ void Animation_Rainbow(HSV_p leds_frame, HSV_p prev_frame)
 
 void Animation_Snake(HSV_p leds_frame, HSV_p notUsed)
 {
+	// перед началом анимации желательпо вызвать ClearFrame
 	static uint32_t	frame = 0;
 	static HSV_t	snake_colors[SNAKE_LENGTH];
 	static uint16_t	snake_positions[SNAKE_LENGTH];
@@ -459,7 +456,7 @@ void Animation_MarbleTube(HSV_p leds_frame, HSV_p prev_frame)
 		if (end == 0) // длина цепи = вся лента
 		{ // restart
 			end = STRIP_LEDS_NUM-1;
-			ClearFrame(leds_frame);
+			FillFrame(leds_frame, LED_OFF); // ClearFrame
 			frame = 0;
 		}
 	}

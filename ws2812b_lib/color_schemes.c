@@ -52,6 +52,10 @@ HSV_t HSV_ModBrightness(HSV_t led, int8_t mod)
 }
 
 
+
+/**
+ *
+ */
 RGB_t ConvertHsvToRgb(HSV_p hsv)
 {
 	if (hsv->S == 0)

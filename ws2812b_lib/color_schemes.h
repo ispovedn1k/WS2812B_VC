@@ -30,6 +30,11 @@ typedef struct __HSV {
 	uint8_t		V;					// Value: 		0 to 255 Brightness
 } HSV_t, *HSV_p;
 
+typedef union __HSV_u {
+	HSV_t		HSV;
+	uint32_t	ui;
+} HSV_ut, *HSV_up;
+
 
 
 RGB_t rgb(uint8_t r, uint8_t g, uint8_t b);

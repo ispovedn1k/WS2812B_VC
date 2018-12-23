@@ -24,6 +24,10 @@ void Animation_Snake(led_unit_p leds_frame, led_unit_p notUsed);
 void Animation_Stars(led_unit_p leds_frame, led_unit_p notUsed);
 void Animation_RoundDance(led_unit_p leds_frame, led_unit_p prev_frame);
 void Animation_MarbleTube(led_unit_p leds_frame, led_unit_p prev_frame);
+void Animation_Dropdown(led_unit_p leds_frame, led_unit_p prev_frame);
+
+void ClearFrame(led_unit_p frame, led_unit_p prev_frame);
+
 	 
 #ifdef __cplusplus
 }
