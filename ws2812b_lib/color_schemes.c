@@ -43,7 +43,7 @@ HSV_t HSV_ModBrightness(HSV_t led, int8_t mod)
 	}
 	else if (v > MAX_V_VALUE)
 	{
-		return hsv(led.H, led.S, 0);
+		return hsv(led.H, led.S, MAX_V_VALUE);
 	}
 	else
 	{
