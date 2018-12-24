@@ -355,7 +355,7 @@ void Animation_Snake(HSV_p leds_frame, HSV_p notUsed)
 	static HSV_t	food_color;
 	static uint16_t food_position;
 
-	for (uint8_t i = SNAKE_LENGTH-1; i > 0; i--) // последние 2 должны быть чёрными, чтобы затирать хвост.
+	for (uint8_t i = SNAKE_LENGTH-1; i >= 0; i--) // последние 2 должны быть чёрными, чтобы затирать хвост.
 	{
 		snake_positions[i] = snake_positions[i-1];
 		leds_frame[snake_positions[i]] = snake_colors[i];
