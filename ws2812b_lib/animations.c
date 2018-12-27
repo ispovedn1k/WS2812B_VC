@@ -25,7 +25,7 @@ static inline void ClearFrame(led_unit_p frame)
 /**
  *
  */
-static inline void FillFrame(led_unit_p frame, led_unit_t val) 
+static inline void FillFrame(led_unit_p frame, led_unit_t val)
 {
 	for(uint32_t i = 0; i < STRIP_LEDS_NUM; i++)
 	{
@@ -52,7 +52,7 @@ void Animation_RunningLed(HSV_p leds_frame, HSV_p notUsed)
 	const uint32_t preset_colors[8] = {HSV_GREEN, HSV_RED, HSV_BLUE, HSV_YELLOW, HSV_MAGENTA, HSV_CYAN, HSV_WHITE, LED_OFF};
 	
 	ClearFrame(leds_frame);
-	
+
 	if (stage % 2 == 0) // прямой ход
 	{
 		SET_COLOR(&leds_frame[frame], color);
@@ -156,7 +156,7 @@ void Animation_RunningLine(HSV_p leds_frame, HSV_p notUsed)
 	static uint32_t frame = 0, stage = 0, color = HSV_GREEN;
 	const uint32_t preset_colors[7] = {HSV_GREEN, HSV_RED, HSV_BLUE, HSV_YELLOW, HSV_MAGENTA, HSV_CYAN, HSV_WHITE};
 
-	for (uint32_t i = 0; i < frame; i++) 
+	for (uint32_t i = 0; i < frame; i++)
 	{
 		SET_COLOR(&leds_frame[i], color);
 	}
@@ -192,7 +192,7 @@ void Animation_Train(HSV_p leds_frame, HSV_p notUsed)
 	static int8_t speed;
 	
 	ClearFrame(leds_frame);
-	
+
 	if (train_position <= -3) 
 	{
 		speed = 1;
@@ -305,7 +305,7 @@ void Animation_Snake(HSV_p leds_frame, HSV_p notUsed)
 	static HSV_t	food_color;
 	static uint16_t food_position;
 
-	for (uint8_t i = SNAKE_LENGTH-1; i >= 0; i--) // последние 2 должны быть чёрными, чтобы затирать хвост.
+	for (uint8_t i = SNAKE_LENGTH-1; i > 0; i--) // последние 2 должны быть чёрными, чтобы затирать хвост.
 	{
 		snake_positions[i] = snake_positions[i-1];
 		leds_frame[snake_positions[i]] = snake_colors[i];
@@ -332,6 +332,8 @@ void Animation_Snake(HSV_p leds_frame, HSV_p notUsed)
 	}
 
 	leds_frame[food_position] = food_color;
+	leds_frame[snake_positions[0]] = snake_colors[0];
+
 	frame++;
 }
 
@@ -360,7 +362,7 @@ void Animation_Stars(HSV_p leds_frame, HSV_p prev_frame)
 			STAR = HSV_ModBrightness(STAR, 3);
 		}
 
-		if (STAR.V < 2)
+		if (STAR.V < 4)
 		{
 			STAR.V = 0;
 			stars[i] = rand() % STRIP_LEDS_NUM;
