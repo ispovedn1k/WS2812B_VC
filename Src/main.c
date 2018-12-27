@@ -80,7 +80,7 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 uint8_t mode = WEB_ORDER_SZ;
-//uint8_t uart_buff[4];
+uint8_t uart_buff[4];
 /* USER CODE END 0 */
 
 /**
@@ -146,8 +146,6 @@ int main(void)
   InitBuffers2812B();
   HAL_TIM_PWM_Start_DMA(&htim3, TIM_CHANNEL_3, (uint32_t *)g_dma_double_buffer, DMA_BUFF_LENGTH);
 
-  HAL_UART_RxCpltCallback(&huart3);
-  // HAL_UART_Receive_IT(&huart3, uart_buff, 4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -179,6 +177,7 @@ int main(void)
     	}
     }
 
+    HAL_UART_Receive_IT(&huart3, uart_buff, 4);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -226,8 +225,6 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	static uint8_t uart_buff[4];
-
 	if (uart_buff[0] == 0xaa)
 	{
 		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
@@ -236,9 +233,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		{
 			mode = WEB_ORDER_SZ;
 		}
+		// продолжаем только если пакет принят правильно.
+		HAL_UART_Receive_IT(&huart3, uart_buff, 4);
 	}
-
-	HAL_UART_Receive_IT(&huart3, uart_buff, 4);
 }
 /* USER CODE END 4 */
 

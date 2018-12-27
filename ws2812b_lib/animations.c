@@ -396,7 +396,27 @@ void Animation_Snake(HSV_p leds_frame, HSV_p notUsed)
 /**
  *
  */
-#define STARS_NUM	50
+#define STARS_NUM	20
+
+static inline void setRandomStarPosition(uint16_t* stars, uint8_t s)
+{
+	uint16_t r = rand() % STRIP_LEDS_NUM;
+	uint8_t i = 0;
+
+	while (i != STARS_NUM)
+	{
+		for (i = 0; i < STARS_NUM; i++)
+		{
+			if (i != s && r == stars[i])
+			{
+				r = rand() % STRIP_LEDS_NUM;
+				break;
+			}
+		}
+	}
+	stars[s] = r;
+}
+
 
 void Animation_Stars(HSV_p leds_frame, HSV_p prev_frame)
 {
@@ -404,7 +424,16 @@ void Animation_Stars(HSV_p leds_frame, HSV_p prev_frame)
 
 	static uint16_t stars[STARS_NUM];
 
-	for (uint16_t i = 0; i < STRIP_LEDS_NUM; i++) {
+	if (frame_counter == 0)
+	{
+		for (uint8_t i = 0; i < STARS_NUM; i++)
+		{
+			setRandomStarPosition(stars, i);
+		}
+	}
+
+	for (uint16_t i = 0; i < STRIP_LEDS_NUM; i++)
+	{
 		leds_frame[i] = HSV_ModBrightness(prev_frame[i], -1);
 	}
 
@@ -419,7 +448,7 @@ void Animation_Stars(HSV_p leds_frame, HSV_p prev_frame)
 		if (STAR.V < 4)
 		{
 			STAR.V = 0;
-			stars[i] = rand() % STRIP_LEDS_NUM;
+			setRandomStarPosition(stars, i);
 			STAR = GetRandomHsvColor();
 		}
 	}
@@ -492,7 +521,6 @@ void Animation_MarbleTube(HSV_p leds_frame, HSV_p prev_frame)
 		SET_COLOR(&leds_frame[0], LED_OFF);
 	}
 
-	leds_frame[end] = prev_frame[end];
 
 	// wave pulse
 	for (i = STRIP_LEDS_NUM-1; i > end; i--)
@@ -502,6 +530,7 @@ void Animation_MarbleTube(HSV_p leds_frame, HSV_p prev_frame)
 
 	if (end < STRIP_LEDS_NUM) // сглаживание пульсации
 	{
+		leds_frame[end] = prev_frame[end];
 		leds_frame[end].S = 0xFF;
 
 		if (frame_counter % 32 == 0) // для пульсации уже стоящих, чтобы скучно не было.
