@@ -355,7 +355,7 @@ void Animation_Snake(HSV_p leds_frame, HSV_p notUsed)
 	static HSV_t	food_color;
 	static uint16_t food_position;
 
-	for (uint8_t i = SNAKE_LENGTH-1; i >= 0; i--) // последние 2 должны быть чёрными, чтобы затирать хвост.
+	for (uint8_t i = SNAKE_LENGTH-1; i > 0; i--) // последние 2 должны быть чёрными, чтобы затирать хвост.
 	{
 		snake_positions[i] = snake_positions[i-1];
 		leds_frame[snake_positions[i]] = snake_colors[i];
@@ -382,6 +382,8 @@ void Animation_Snake(HSV_p leds_frame, HSV_p notUsed)
 	}
 
 	leds_frame[food_position] = food_color;
+	leds_frame[snake_positions[0]] = snake_colors[0];
+
 	frame_counter++;
 
 	if (frame_counter > STRIP_LEDS_NUM * 8)
@@ -394,13 +396,13 @@ void Animation_Snake(HSV_p leds_frame, HSV_p notUsed)
 /**
  *
  */
-#define STARS_NUM	10
+#define STARS_NUM	50
 
 void Animation_Stars(HSV_p leds_frame, HSV_p prev_frame)
 {
 #define		STAR	leds_frame[stars[i]]
 
-	static uint32_t stars[STARS_NUM];
+	static uint16_t stars[STARS_NUM];
 
 	for (uint16_t i = 0; i < STRIP_LEDS_NUM; i++) {
 		leds_frame[i] = HSV_ModBrightness(prev_frame[i], -1);
@@ -414,7 +416,7 @@ void Animation_Stars(HSV_p leds_frame, HSV_p prev_frame)
 			STAR = HSV_ModBrightness(STAR, 3);
 		}
 
-		if (STAR.V < 2)
+		if (STAR.V < 4)
 		{
 			STAR.V = 0;
 			stars[i] = rand() % STRIP_LEDS_NUM;

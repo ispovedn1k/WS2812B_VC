@@ -42,6 +42,7 @@
 #include "main.h"
 #include "dma.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -56,7 +57,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define WEB_ORDER_SZ	13
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -78,7 +79,8 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+uint8_t mode = WEB_ORDER_SZ;
+//uint8_t uart_buff[4];
 /* USER CODE END 0 */
 
 /**
@@ -99,6 +101,22 @@ int main(void)
 	Animation_Snake,
 	Animation_Stars,
 	Animation_RoundDance
+  };
+
+  Animation_function web_order[] = {
+	ClearFrame,
+	Animation_RunningLed,
+	Animation_RunningLed2,
+	Animation_Pulse,
+	Animation_RunningLine,
+	Animation_Train,
+	Animation_DoubleTrain,
+	Animation_Rainbow,
+	Animation_Snake,
+	Animation_RoundDance,
+	Animation_MarbleTube,
+	Animation_Dropdown,
+	Animation_Stars,
   };
 
   /* USER CODE END 1 */
@@ -123,28 +141,44 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_TIM3_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   InitBuffers2812B();
   HAL_TIM_PWM_Start_DMA(&htim3, TIM_CHANNEL_3, (uint32_t *)g_dma_double_buffer, DMA_BUFF_LENGTH);
+
+  HAL_UART_RxCpltCallback(&huart3);
+  // HAL_UART_Receive_IT(&huart3, uart_buff, 4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uint8_t i = 0;
+  uint8_t last_mode = WEB_ORDER_SZ;
   SetAnimation(sequences[i]);
 
   while (1)
   {
     CalcNextFrame();
-    if (isAnimationComplete())
+    if (last_mode != mode)
     {
-    	i++;
-    	if (i > 9)
-    	{
-    		i = 0;
+    	last_mode = mode;
+    	if (last_mode < WEB_ORDER_SZ) {
+    		SetAnimation(web_order[last_mode]);
     	}
-    	SetAnimation(sequences[i]);
     }
+    else if (last_mode == WEB_ORDER_SZ)
+    {
+    	if (isAnimationComplete())
+    	{
+    	   	i++;
+    	   	if (i > 9)
+    	   	{
+    	   		i = 0;
+    	   	}
+    	 	SetAnimation(sequences[i]);
+    	}
+    }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -190,7 +224,22 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	static uint8_t uart_buff[4];
 
+	if (uart_buff[0] == 0xaa)
+	{
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+		mode = uart_buff[1];
+		if (mode > WEB_ORDER_SZ)
+		{
+			mode = WEB_ORDER_SZ;
+		}
+	}
+
+	HAL_UART_Receive_IT(&huart3, uart_buff, 4);
+}
 /* USER CODE END 4 */
 
 /**
